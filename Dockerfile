@@ -24,4 +24,4 @@ RUN npm install
 EXPOSE 9527
 
 # ---- 保持主进程不退出 ----
-CMD ["tail", "-f", "/dev/null"]
+CMD ["npm", "run", "dev"]
