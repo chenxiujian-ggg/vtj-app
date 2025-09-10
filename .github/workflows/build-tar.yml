@@ -1,26 +1,58 @@
-name: Build vtj.tar
+name: Build → Test → Export vtj.tar
 
 on:
   push:
-    branches: [main, master]
-  workflow_dispatch:          # 手动触发也可
+    branches: [main]
+
+env:
+  IMAGE_NAME: vtj:ci
 
 jobs:
-  build:
+  build-test-export:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. 设置 Buildx（支持缓存）
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # 1. 构建镜像
+      - name: Build Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }} .
 
-      # 2. 构建镜像（本地 docker 引擎，不推送）
-      - name: Build image
-        uses: docker/build-push-action@v5
+      # 2. 启动容器（后台）
+      - name: Run container
+        run: |
+          docker run -d --name vtj-test -p 9527:9527 ${{ env.IMAGE_NAME }}
+
+      # 3. 等待服务健康（最多 60 s）
+      - name: Health check
+        run: |
+          for i in {1..30}; do
+            if nc -z 127.0.0.1 9527; then
+              echo "✅ Port 9527 is open"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ Timeout waiting for 9527"
+          exit 1
+
+      # 4. 输出完整日志
+      - name: Container logs
+        run: docker logs vtj-test
+
+      # 5. 停止并删除测试容器
+      - name: Cleanup container
+        run: docker rm -f vtj-test
+
+      # 6. 导出镜像
+      - name: Export image to tar
+        run: docker save ${{ env.IMAGE_NAME }} > vtj.tar
+
+      # 7. 上传工件（提供下载链接）
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          context: .
-          tags: vtj:latest
-          outputs: type=docker,dest=vtj.tar   # 关键：
+          name: vtj-image
+          path: vtj.tar
+          retention-days: 7   # 可调整保留天数
