@@ -22,11 +22,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # ---- 构建阶段自检：启动-dev->探测->kill ----
-RUN BROWSER=none npm run dev  -- --host 0.0.0.0 --port 9527 & \
+RUN BROWSER=none npm run dev -- --host 0.0.0.0 --port 9527 & \
     pid=$! && \
     echo "waiting for dev server on port ${PORT}..." && \
     for i in {1..30}; do \
-      if nc -z 127.0.0.1 ${PORT}; then \
+      if nc -z 0.0.0.0 9527; then \
         echo "✅ dev server is healthy, shutting down..." && \
         kill $pid && wait $pid 2>/dev/null && exit 0; \
       fi; \
