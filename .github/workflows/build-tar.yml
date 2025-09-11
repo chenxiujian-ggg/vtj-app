@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: vtj:ci
+  IMAGE_NAME: vtj:test
 
 jobs:
   build-test-export:
