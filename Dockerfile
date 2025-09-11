@@ -22,7 +22,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # ---- 构建阶段自检：启动-dev->探测->kill ----
-RUN BROWSER=none npm run dev & \
+RUN BROWSER=none npm run dev  -- --host 0.0.0.0 --port 9527 & \
     pid=$! && \
     echo "waiting for dev server on port ${PORT}..." && \
     for i in {1..30}; do \
