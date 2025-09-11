@@ -17,10 +17,13 @@ WORKDIR /app/app
 RUN npm install
 
 # =====  关键：构建阶段自检  =====
-# 1. 后台启动 dev 服务
-# 2. 用内建 healthcheck 等待端口就绪
-# 3. 能连通就 kill 掉，构建继续；超时则构建失败
-RUN npm run dev & \
+# 1. 装探测工具
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
+
+# 2. 自检
+RUN BROWSER=none npm run dev & \
     pid=$! && \
     echo "waiting for dev server on port ${PORT}..." && \
     for i in {1..30}; do \
