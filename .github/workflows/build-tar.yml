@@ -22,7 +22,7 @@ jobs:
       # 2. 启动容器（后台）
       - name: Run container
         run: |
-          docker run -d --name vtj-test -p 9527:9527 ${{ env.IMAGE_NAME }}
+          docker run -d --name vtj-test -p 9527:9527 ${{ env.IMAGE_NAME }} npm run dev
 
       # 3. 等待服务健康（最多 60 s）
       - name: Health check
