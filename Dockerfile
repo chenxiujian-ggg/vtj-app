@@ -17,12 +17,13 @@ WORKDIR /app/app
 RUN npm install
 
 # ---- 构建阶段：只启动 60 秒 → 强制 kill ----
+# ---- 构建阶段：启动 60 秒 → 强制 kill（忽略退出码）----
 RUN BROWSER=none npm run dev -- --host 0.0.0.0 --port 9527 & \
     pid=$! && \
     echo "dev server running, waiting 60 s ..." && \
-    sleep 60 && \
+    sleep 20 && \
     echo "time up, killing dev server" && \
-    kill $pid && wait $pid 2>/dev/null
+    (kill $pid && wait $pid 2>/dev/null || true)
 
 # ---- 暴露端口 ----
 EXPOSE 9527
