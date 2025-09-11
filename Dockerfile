@@ -23,17 +23,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 2. 自检
-RUN BROWSER=none npm run dev & \
-    pid=$! && \
-    echo "waiting for dev server on port ${PORT}..." && \
-    for i in {1..30}; do \
-      if nc -z 127.0.0.1 ${PORT}; then \
-        echo "✅ dev server is healthy, shutting down..." && \
-        kill $pid && wait $pid 2>/dev/null && exit 0; \
-      fi; \
-      sleep 2; \
-    done && \
-    echo "❌ dev server failed to start" && kill $pid && exit 1
+RUN BROWSER=none npm run dev
 
 # ---- 暴露端口 ----
 EXPOSE 9527
